@@ -55,7 +55,7 @@ public class AuditExtension implements Extension {
                     JSONObject audit = new JSONObject();
                     object.put(f, audit);
                     audit.put("old",m.getRawRecord().getOldValue(f));
-                    audit.put("new",m.getReflector().get(m,f));
+                    audit.put("new",m.getRawRecord().get(f));
                 }
                 modelAudit.setComment(object.toString());
                 break;
