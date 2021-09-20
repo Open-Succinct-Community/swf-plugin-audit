@@ -35,7 +35,7 @@ public class AuditExtension implements Extension {
         if (!audited.value()){
             return;
         }
-        if (!m.isDirty()){
+        if (!m.isDirty() && operation != Operation.CREATE){
             return;
         }
 
