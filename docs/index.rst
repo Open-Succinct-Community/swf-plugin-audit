@@ -10,9 +10,7 @@ Welcome to Succinct Web Framework's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   usage/overview
-   usage/quickstart
-   usage/detailed
+   usage/audit.md
 
 
 Indices and tables
