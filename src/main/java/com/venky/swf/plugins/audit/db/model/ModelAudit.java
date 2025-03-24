@@ -4,6 +4,8 @@ import com.venky.swf.db.annotations.column.COLUMN_SIZE;
 import com.venky.swf.db.annotations.column.indexing.Index;
 import com.venky.swf.db.model.Model;
 
+import java.io.Reader;
+
 
 public interface ModelAudit extends Model {
     @Index
@@ -17,7 +19,6 @@ public interface ModelAudit extends Model {
     public String getIpAddress();
     public void setIpAddress(String address);
 
-    @COLUMN_SIZE(2048)
-    public String getComment();
-    public void setComment(String comment);
+    public Reader getComment();
+    public void setComment(Reader comment);
 }

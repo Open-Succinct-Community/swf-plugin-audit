@@ -1,5 +1,6 @@
 package com.venky.swf.plugins.audit.extensions;
 
+import com.venky.core.io.StringReader;
 import com.venky.extension.Extension;
 import com.venky.extension.Registry;
 import com.venky.swf.db.Database;
@@ -47,7 +48,7 @@ public class AuditExtension implements Extension {
         modelAudit.setName(m.getReflector().getModelClass().getSimpleName());
         switch (operation){
             case CREATE:
-                modelAudit.setComment("Created");
+                modelAudit.setComment(new StringReader("Created"));
                 break;
             case UPDATE:
                 JSONObject object = new JSONObject();
@@ -57,7 +58,7 @@ public class AuditExtension implements Extension {
                     audit.put("old",m.getRawRecord().getOldValue(f));
                     audit.put("new",m.getRawRecord().get(f));
                 }
-                modelAudit.setComment(object.toString());
+                modelAudit.setComment(new StringReader(object.toString()));
                 break;
         }
         modelAudit.save();
