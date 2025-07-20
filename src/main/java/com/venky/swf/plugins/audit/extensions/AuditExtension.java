@@ -6,6 +6,7 @@ import com.venky.extension.Registry;
 import com.venky.swf.db.Database;
 import com.venky.swf.db.model.Model;
 
+import com.venky.swf.db.model.reflection.ModelReflector;
 import com.venky.swf.path._IPath;
 import com.venky.swf.plugins.audit.db.model.AUDITED;
 import com.venky.swf.plugins.audit.db.model.ModelAudit;
@@ -55,8 +56,18 @@ public class AuditExtension implements Extension {
                 for (String f: m.getRawRecord().getDirtyFields()){
                     JSONObject audit = new JSONObject();
                     object.put(f, audit);
-                    audit.put("old",m.getRawRecord().getOldValue(f));
-                    audit.put("new",m.getRawRecord().get(f));
+                    
+                    Object oldValue = m.getRawRecord().getOldValue(f);
+                    if (oldValue != null){
+                        oldValue = m.getReflector().getJdbcTypeHelper().getTypeRef(oldValue.getClass()).getTypeConverter().toString(oldValue);
+                    }
+                    Object newValue = m.getRawRecord().get(f);
+                    if (newValue != null){
+                        newValue = m.getReflector().getJdbcTypeHelper().getTypeRef(newValue.getClass()).getTypeConverter().toString(newValue);
+                    }
+                    
+                    audit.put("old",oldValue);
+                    audit.put("new", newValue);
                 }
                 modelAudit.setComment(new StringReader(object.toString()));
                 break;
