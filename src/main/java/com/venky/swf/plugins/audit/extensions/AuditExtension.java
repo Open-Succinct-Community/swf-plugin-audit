@@ -10,6 +10,8 @@ import com.venky.swf.db.model.reflection.ModelReflector;
 import com.venky.swf.path._IPath;
 import com.venky.swf.plugins.audit.db.model.AUDITED;
 import com.venky.swf.plugins.audit.db.model.ModelAudit;
+import in.succinct.json.JSONAwareWrapper;
+import in.succinct.json.JSONComm;
 import org.json.simple.JSONObject;
 
 public class AuditExtension implements Extension {
@@ -65,9 +67,24 @@ public class AuditExtension implements Extension {
                     if (newValue != null){
                         newValue = m.getReflector().getJdbcTypeHelper().getTypeRef(newValue.getClass()).getTypeConverter().toString(newValue);
                     }
+                    if (oldValue == null || newValue == null ){
+                        audit.put("old", oldValue);
+                        audit.put("new", newValue);
+                    }else {
+                        try {
+                            //Make trimmed difference for json objects.
+                            JSONObject o = JSONAwareWrapper.parse((String)oldValue);
+                            JSONObject n = JSONAwareWrapper.parse((String)newValue);
+                            audit.put("old", JSONComm.getInstance().subtract(o, n));
+                            audit.put("new", JSONComm.getInstance().subtract(n, o));
+                        }catch (Exception ex) {
+                            audit.put("old", oldValue);
+                            audit.put("new", newValue);
+                        }
+                    }
                     
-                    audit.put("old",oldValue);
-                    audit.put("new", newValue);
+                    
+                    
                 }
                 modelAudit.setComment(new StringReader(object.toString()));
                 break;
