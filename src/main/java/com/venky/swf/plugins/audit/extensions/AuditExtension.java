@@ -7,6 +7,7 @@ import com.venky.swf.db.Database;
 import com.venky.swf.db.model.Model;
 import com.venky.swf.path._IPath;
 import com.venky.swf.plugins.audit.db.model.AUDITED;
+import com.venky.swf.plugins.audit.db.model.JSONDiff;
 import com.venky.swf.plugins.audit.db.model.ModelAudit;
 import in.succinct.json.JSONAwareWrapper;
 import in.succinct.json.JSONComm;
@@ -51,6 +52,8 @@ public class AuditExtension implements Extension {
         JSONObject object = new JSONObject();
         for (String f: (operation == Operation.CREATE)? m.getRawRecord().getFieldNames() : m.getRawRecord().getDirtyFields()){
             JSONObject audit = new JSONObject();
+            JSONDiff jsonDiff = m.getReflector().getAnnotation(m.getReflector().getFieldGetter(f), JSONDiff.class);
+            
             object.put(f, audit);
             
             Object oldValue = m.getRawRecord().getOldValue(f);
@@ -61,19 +64,22 @@ public class AuditExtension implements Extension {
             if (newValue != null){
                 newValue = m.getReflector().getJdbcTypeHelper().getTypeRef(newValue.getClass()).getTypeConverter().toString(newValue);
             }
+            
             if (oldValue == null || newValue == null ){
-                audit.put("old", oldValue);
-                audit.put("new", newValue);
+                putDefault(audit,oldValue,newValue);
             }else {
                 try {
                     //Make trimmed difference for json objects.
-                    JSONObject o = JSONAwareWrapper.parse((String)oldValue);
-                    JSONObject n = JSONAwareWrapper.parse((String)newValue);
-                    audit.put("old", JSONComm.getInstance().subtract(o, n));
-                    audit.put("new", JSONComm.getInstance().subtract(n, o));
+                    if (jsonDiff != null && jsonDiff.value()) {
+                        JSONObject o = JSONAwareWrapper.parse((String) oldValue);
+                        JSONObject n = JSONAwareWrapper.parse((String) newValue);
+                        audit.put("old", JSONComm.getInstance().subtract(o, n));
+                        audit.put("new", JSONComm.getInstance().subtract(n, o));
+                    }else {
+                        putDefault(audit,oldValue,newValue);
+                    }
                 }catch (Exception ex) {
-                    audit.put("old", oldValue);
-                    audit.put("new", newValue);
+                    putDefault(audit,oldValue,newValue);
                 }
             }
             
@@ -82,5 +88,9 @@ public class AuditExtension implements Extension {
         }
         modelAudit.setComment(new StringReader(object.toString()));
         modelAudit.save();
+    }
+    private void putDefault(JSONObject audit, Object oldValue, Object newValue){
+        audit.put("old", oldValue);
+        audit.put("new", newValue);
     }
 }
