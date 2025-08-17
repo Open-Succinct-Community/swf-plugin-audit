@@ -52,7 +52,7 @@ public class AuditExtension implements Extension {
         JSONObject object = new JSONObject();
         for (String f: (operation == Operation.CREATE)? m.getRawRecord().getFieldNames() : m.getRawRecord().getDirtyFields()){
             JSONObject audit = new JSONObject();
-            JSONDiff jsonDiff = m.getReflector().getAnnotation(m.getReflector().getFieldGetter(f), JSONDiff.class);
+            JSONDiff jsonDiff = m.getReflector().getAnnotation(m.getReflector().getFieldGetter(m.getReflector().getFieldName(f)), JSONDiff.class);
             
             object.put(f, audit);
             
