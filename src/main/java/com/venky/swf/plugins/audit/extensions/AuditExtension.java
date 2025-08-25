@@ -44,7 +44,7 @@ public class AuditExtension implements Extension {
         }
 
         _IPath path = Database.getInstance().getContext(_IPath.class.getName());
-        String remoteHost = path == null ? "" : path.getRequest().getHeader("X-Real-IP") ;
+        String remoteHost = path == null ? "" : path.getHeader("Real-IP") ;
         ModelAudit modelAudit = Database.getTable(ModelAudit.class).newRecord();
         modelAudit.setModelId(m.getId());
         modelAudit.setIpAddress(remoteHost);
